@@ -1,0 +1,42 @@
+/**
+ * @file config.hpp
+ * @brief
+ */
+
+#pragma once
+#ifndef CPP_PIPE_OPERATOR_HELPER_DETAIL_CONFIG_HPP
+#define CPP_PIPE_OPERATOR_HELPER_DETAIL_CONFIG_HPP
+
+#if (__cplusplus < 201103L)
+#error "Library `cpp_pipe_operator_helper` requires C++11 or higher."
+#endif
+
+#if (__cplusplus >= 201402L)
+#define PIPE_OPERATOR_HELPER_CPP14_CONSTEXPR constexpr
+#else
+#define PIPE_OPERATOR_HELPER_CPP14_CONSTEXPR
+#endif
+
+#if (__cplusplus >= 202002L)
+#define PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR constexpr
+#else
+#define PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR
+#endif
+
+#ifdef PIPE_OPERATOR_HELPER_MODULE_INTERFACE_UNIT
+
+/* clang-format off */
+#define PIPE_OPERATOR_HELPER_MODULE_EXPORT       export
+#define PIPE_OPERATOR_HELPER_MODULE_EXPORT_BEGIN export {
+#define PIPE_OPERATOR_HELPER_MODULE_EXPORT_END   }
+/* clang-format on */
+
+#else
+
+#define PIPE_OPERATOR_HELPER_MODULE_EXPORT
+#define PIPE_OPERATOR_HELPER_MODULE_EXPORT_BEGIN
+#define PIPE_OPERATOR_HELPER_MODULE_EXPORT_END
+
+#endif
+
+#endif  // !CPP_PIPE_OPERATOR_HELPER_DETAIL_CONFIG_HPP
