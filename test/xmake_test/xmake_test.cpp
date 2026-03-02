@@ -14,16 +14,16 @@
 import pipe_operator_helper;
 #endif
 
-namespace pipe = pipe_operator_helper;
+namespace pipe_ = pipe_operator_helper;
 
 static int add(const int a, const int b) noexcept
 {
     return a + b;
 }
 
-static auto add(const int b) noexcept -> pipe::pipe_tag<int, int (&)(int, int), const int, const int>
+static auto add(const int b) noexcept -> pipe_::pipe_tag<int, int (&)(int, int), const int, const int>
 {
-    return pipe::pipe_tag<int, int (&)(int, int), const int, const int>{add, std::forward<const int>(b)};
+    return pipe_::pipe_tag<int, int (&)(int, int), const int, const int>{add, std::forward<const int>(b)};
 }
 
 #define ASSERT(cond)         \

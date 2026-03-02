@@ -32,9 +32,17 @@ if (CPP_PIPE_OPERATOR_HELPER_USE_MODULES)
     if (CPP_PIPE_OPERATOR_HELPER_BUILD_SHARED)
         add_library(${PROJECT_NAME} SHARED)
         message(STATUS "[${PROJECT_NAME}]: provides module with shared library.")
+
+        if (MSVC)
+        target_sources(${PROJECT_NAME} PRIVATE src/dll_dummy_export.cpp)
+        endif ()
     else ()
         add_library(${PROJECT_NAME} STATIC)
         message(STATUS "[${PROJECT_NAME}]: provides module with static library.")
+    endif ()
+
+    if (MSVC)
+        target_compile_options(${PROJECT_NAME} PRIVATE /Zc:__cplusplus)
     endif ()
 
     target_include_directories(${PROJECT_NAME} PUBLIC include)

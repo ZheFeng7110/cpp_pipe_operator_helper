@@ -3,6 +3,8 @@
  * @brief
  */
 
+// ReSharper disable CppRedundantInlineSpecifier
+
 #pragma once
 #ifndef CPP_PIPE_OPERATOR_HELPER_PIPE_TAG_HPP
 #define CPP_PIPE_OPERATOR_HELPER_PIPE_TAG_HPP
@@ -49,10 +51,10 @@ constexpr bool is_invoke_with_1arg_1tuple_noexcept_v =
     is_invoke_with_1arg_1tuple_noexcept<Func, First, Remains...>::value;
 
 template<typename Func, typename First, typename Tuple, std::size_t... Index>
-PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR decltype(auto) invoke_with_1arg_1tuple_impl(Func&& func,
-                                                                                 First&& first,
-                                                                                 Tuple&& tuple,
-                                                                                 std::index_sequence<Index...>)
+inline PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR decltype(auto) invoke_with_1arg_1tuple_impl(Func&& func,
+                                                                                        First&& first,
+                                                                                        Tuple&& tuple,
+                                                                                        std::index_sequence<Index...>)
 {
     return std::invoke(std::forward<Func>(func),
                        std::forward<First>(first),
@@ -60,7 +62,9 @@ PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR decltype(auto) invoke_with_1arg_1tuple_impl
 }
 
 template<typename Func, typename First, typename Tuple>
-PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR decltype(auto) invoke_with_1arg_1tuple(Func&& func, First&& first, Tuple&& tuple)
+inline PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR decltype(auto) invoke_with_1arg_1tuple(Func&& func,
+                                                                                   First&& first,
+                                                                                   Tuple&& tuple)
 {
     constexpr auto tuple_size = std::tuple_size<typename std::remove_reference<Tuple>::type>::value;
     return invoke_with_1arg_1tuple_impl(std::forward<Func>(func),
@@ -81,12 +85,12 @@ public:
     using function_type = Func;
 
 protected:
-    function_type func_;
+    function_type& func_;
     std::tuple<RemainArgs...> remain_args_;
 
 public:
     explicit constexpr pipe_tag(Func&& func, RemainArgs&&... remain_args) noexcept
-        : func_(std::forward<Func>(func)), remain_args_(std::forward<RemainArgs>(remain_args)...)
+        : func_{std::forward<Func>(func)}, remain_args_{std::forward<RemainArgs>(remain_args)...}
     {
     }
 

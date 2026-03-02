@@ -6,3 +6,5 @@ cmake-build-*
 .vscode/
 
 .xmake/
+
+test/googletest/

@@ -1,0 +1,175 @@
+name: Unit Test
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  on-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Bacondish2023/setup-googletest@v1
+        with:
+          tag: v1.17.0
+
+      - uses: actions/checkout@v4
+
+      - name: Setup deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install g++-14 ninja-build cmake xmake
+          xmake update
+
+      - run: source ~/.bashrc
+
+      # C++11
+      - name: CMake config C++11
+        run: >
+          cmake -S . -B build-11 -G Ninja -DCMAKE_BUILD_TYPE=Release
+          -DCPP_PIPE_OPERATOR_HELPER_USE_MODULES=OFF
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_SHARED=OFF
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_TESTS=ON
+          -DCPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD=11
+          --debug-output
+      - name: CMake build C++11
+        run: cmake --build build-11 --verbose
+      - name: ctest C++11
+        run: cd build-11 && ctest . --verbose && cd ..
+      - name : clean C++11
+        run: rm -r ./build-11
+
+      # C++14
+      - name: CMake config C++14
+        run: >
+          cmake -S . -B build-14 -G Ninja -DCMAKE_BUILD_TYPE=Release
+          -DCPP_PIPE_OPERATOR_HELPER_USE_MODULES=OFF
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_SHARED=OFF
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_TESTS=ON
+          -DCPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD=14
+          --debug-output
+      - name: CMake build C++14
+        run: cmake --build build-14 --verbose
+      - name: ctest C++14
+        run: cd build-14 && ctest . --verbose && cd ..
+      - name: clean C++14
+        run: rm -r ./build-14
+
+      # C++17
+      - name: CMake config C++17
+        run: >
+          cmake -S . -B build-17 -G Ninja -DCMAKE_BUILD_TYPE=Release
+          -DCPP_PIPE_OPERATOR_HELPER_USE_MODULES=OFF
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_SHARED=OFF
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_TESTS=ON
+          -DCPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD=17
+          --debug-output
+      - name: CMake build C++17
+        run: cmake --build build-17 --verbose
+      - name: ctest C++17
+        run: cd build-17 && ctest . --verbose && cd ..
+      - name: clean C++17
+        run: rm -r ./build-17
+
+      # C++20
+      - name: CMake config C++20
+        run: >
+          source ~/.bashrc && export CXX="g++-14" &&
+          cmake -S . -B build-20 -G Ninja -DCMAKE_BUILD_TYPE=Release
+          -DCPP_PIPE_OPERATOR_HELPER_USE_MODULES=ON
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_SHARED=ON
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_TESTS=ON
+          -DCPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD=20
+          --debug-output
+      - name: CMake build C++20
+        run: cmake --build build-20 --verbose
+      - name: ctest C++20
+        run: cd build-20 && ctest . --verbose && cd ..
+      - name: clean C++20
+        run: rm -r ./build-20
+
+      # C++23
+      - name: CMake config C++23
+        run: >
+          source ~/.bashrc && export CXX="g++-14" &&
+          cmake -S . -B build-23 -G Ninja -DCMAKE_BUILD_TYPE=Release
+          -DCPP_PIPE_OPERATOR_HELPER_USE_MODULES=ON
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_SHARED=OFF
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_TESTS=ON
+          -DCPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD=23
+          --debug-output
+      - name: CMake build C++23
+        run: cmake --build build-23 --verbose
+      - name: ctest C++23
+        run: cd build-23 && ctest . --verbose && cd ..
+      - name: clean C++23
+        run: rm -r ./build-23
+
+      - name: XMake Config
+        run: >
+          xmake f --cxx=g++-14 --ld=g++-14
+          --cpp_pipe_operator_helper-use-modules=y
+          --cpp_pipe_operator_helper-enable-test=y
+          --cpp_pipe_operator_helper-build-shared=n
+          --verbose --builddir=build-xmake
+
+      - name: XMake build
+        run: xmake --build --verbose
+
+      - name: XMake run test
+        run: xmake run cpp_pipe_operator_helper_test
+
+  on-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Add MSVC to PATH
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - uses: Bacondish2023/setup-googletest@v1
+        with:
+          tag: v1.17.0
+
+      # C++14
+      - name: CMake config C++14
+        run: >
+          cmake -S . -B build-14 -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+          -DCPP_PIPE_OPERATOR_HELPER_USE_MODULES=OFF
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_SHARED=OFF
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_TESTS=ON
+          -DCPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD=14
+          --debug-output
+      - name: CMake build C++14
+        run: cmake --build build-14 --verbose --config Release
+      - name: ctest C++14
+        run: cd build-14 && ctest . --verbose -C release && cd ..
+
+      # C++17
+      - name: CMake config C++17
+        run: >
+          cmake -S . -B build-17 -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+          -DCPP_PIPE_OPERATOR_HELPER_USE_MODULES=OFF
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_SHARED=OFF
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_TESTS=ON
+          -DCPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD=17
+          --debug-output
+      - name: CMake build C++17
+        run: cmake --build build-17 --verbose --config Release
+      - name: ctest C++17
+        run: cd build-17 && ctest . --verbose -C release && cd ..
+
+      # C++20
+      - name: CMake config C++20
+        run: >
+          cmake -S . -B build-20 -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+          -DCPP_PIPE_OPERATOR_HELPER_USE_MODULES=ON
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_SHARED=ON
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_TESTS=ON
+          -DCPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD=20
+          --debug-output
+      - name: CMake build C++20
+        run: cmake --build build-20 --verbose --config Release
+      - name: ctest C++20
+        run: cd build-20 && ctest . --verbose -C release && cd ..

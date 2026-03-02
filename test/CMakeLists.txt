@@ -22,7 +22,7 @@ set(CMAKE_CXX_STANDARD "${CPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD}"
 include("find_gtest.cmake")
 
 if (MSVC)
-    add_compile_options(/W4)
+    add_compile_options(/W4 /Zc:__cplusplus)
 else ()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif ()
@@ -32,14 +32,21 @@ function (declareTest testName cppStandard)
 
     add_executable(${testProjectName} type_cast_test.cpp pipe_operator_test.cpp)
 
+    message(DEBUG "[${PROJECT_NAME}]: Binary dir: ${CMAKE_CURRENT_BINARY_DIR}")
+
     if ((${cppStandard} GREATER_EQUAL 20) AND (CPP_PIPE_OPERATOR_HELPER_USE_MODULES))
-        set(CMAKE_CXX_SCAN_FOR_MODULES ON)
+        set(CMAKE_CXX_SCAN_FOR_MODULES ON CACHE INTERNAL "" FORCE)
         target_compile_definitions(${testProjectName} PRIVATE TEST_USE_MODULE)
     endif ()
 
     target_link_libraries(${testProjectName} PRIVATE cpp_pipe_operator_helper
         GTest::gtest GTest::gtest_main
     )
+
+    if (NOT MSVC AND (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang"))
+        find_package(Threads REQUIRED)
+        target_link_libraries(${testProjectName} PRIVATE Threads::Threads)
+    endif ()
 
     target_precompile_headers(${testProjectName} PRIVATE gtest_pch.hpp)
 

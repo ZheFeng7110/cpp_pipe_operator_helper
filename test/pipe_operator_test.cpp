@@ -25,33 +25,37 @@ import pipe_operator_helper;
 #define PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR constexpr
 #endif
 
-namespace pipe = pipe_operator_helper;
+namespace {
+
+namespace pipe_ = pipe_operator_helper;
 
 // Example function with 2 arguments
-static PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR int add(const int a, const int b) noexcept
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR int add(const int a, const int b) noexcept
 {
     return a + b;
 }
 
-static PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto add(const int b) noexcept
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto add(const int b) noexcept
 #ifdef TEST_IS_CPP20_OR_HIGHER
-    -> pipe::constexpr_pipe_tag<int, int (&)(int, int), const int, const int>
+    -> pipe_::constexpr_pipe_tag<int, int (&)(int, int), const int, const int>
 #else
-    -> pipe::pipe_tag<int, int (&)(int, int), const int, const int>
+    -> pipe_::pipe_tag<int, int (&)(int, int), const int, const int>
 #endif
 {
     return
 #ifdef TEST_IS_CPP20_OR_HIGHER
-        pipe::constexpr_pipe_tag<int, int (&)(int, int), const int, const int>
+        pipe_::constexpr_pipe_tag<int, int (&)(int, int), const int, const int>
 #else
-        pipe::pipe_tag<int, int (&)(int, int), const int, const int>
+        pipe_::pipe_tag<int, int (&)(int, int), const int, const int>
 #endif
         {add, std::forward<const int>(b)};
 }
 
+}  // namespace
+
 TEST(PipeTest, Add)
 {
-#ifdef TEST_IS_CPP20_OR_HIGHER
+#if (defined(TEST_IS_CPP20_OR_HIGHER) && !defined(_MSC_VER))
     static_assert(2 == add(1, 1));
     static_assert(2 == (1 | add(1)));
 
@@ -66,8 +70,10 @@ TEST(PipeTest, Add)
     EXPECT_EQ(114515, 114514 | add(1) | add(0));
 }
 
+namespace {
+
 // Example function used exception
-static PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR int divide(const int a, const int b)
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR int divide(const int a, const int b)
 {
     if (b == 0) {
         throw std::logic_error("divide by zero");
@@ -75,25 +81,27 @@ static PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR int divide(const int a, const int b)
     return a / b;
 }
 
-static PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto divide(const int b)
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto divide(const int b)
 #ifdef TEST_IS_CPP20_OR_HIGHER
-    -> pipe::constexpr_pipe_tag<int, int (&)(int, int), const int, const int>
+    -> pipe_::constexpr_pipe_tag<int, int (&)(int, int), const int, const int>
 #else
-    -> pipe::pipe_tag<int, int (&)(int, int), const int, const int>
+    -> pipe_::pipe_tag<int, int (&)(int, int), const int, const int>
 #endif
 {
     return
 #ifdef TEST_IS_CPP20_OR_HIGHER
-        pipe::constexpr_pipe_tag<int, int (&)(int, int), const int, const int>
+        pipe_::constexpr_pipe_tag<int, int (&)(int, int), const int, const int>
 #else
-        pipe::pipe_tag<int, int (&)(int, int), const int, const int>
+        pipe_::pipe_tag<int, int (&)(int, int), const int, const int>
 #endif
         {divide, std::forward<const int>(b)};
 }
 
+}  // namespace
+
 TEST(PipeTest, Divide)
 {
-#ifdef TEST_IS_CPP20_OR_HIGHER
+#if (defined(TEST_IS_CPP20_OR_HIGHER) && !defined(_MSC_VER))
     constexpr std::equal_to<int> eq;
 
     static_assert(eq(2, divide(4, 2)));
@@ -119,31 +127,35 @@ TEST(PipeTest, Divide)
     EXPECT_THROW(-4 | divide(2) | divide(0), std::logic_error);
 }
 
+namespace {
+
 // Example function with 1 argument
-static PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR bool logic_not(const bool b) noexcept
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR bool logic_not(const bool b) noexcept
 {
     return !b;
 }
 
-static PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto logic_not() noexcept
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto logic_not() noexcept
 #ifdef TEST_IS_CPP20_OR_HIGHER
-    -> pipe::constexpr_pipe_tag<bool, bool (&)(bool), const bool>
+    -> pipe_::constexpr_pipe_tag<bool, bool (&)(bool), const bool>
 #else
-    -> pipe::pipe_tag<bool, bool (&)(bool), const bool>
+    -> pipe_::pipe_tag<bool, bool (&)(bool), const bool>
 #endif
 {
     return
 #ifdef TEST_IS_CPP20_OR_HIGHER
-        pipe::constexpr_pipe_tag<bool, bool (&)(bool), const bool>
+        pipe_::constexpr_pipe_tag<bool, bool (&)(bool), const bool>
 #else
-        pipe::pipe_tag<bool, bool (&)(bool), const bool>
+        pipe_::pipe_tag<bool, bool (&)(bool), const bool>
 #endif
         {::logic_not};
 }
 
+}  // namespace
+
 TEST(PipeTest, LogicNot)
 {
-#ifdef TEST_IS_CPP20_OR_HIGHER
+#if (defined(TEST_IS_CPP20_OR_HIGHER) && !defined(_MSC_VER))
     constexpr std::equal_to<int> eq;
 
     static_assert(eq(true, logic_not(false)));
@@ -160,16 +172,131 @@ TEST(PipeTest, LogicNot)
     EXPECT_EQ(false, false | logic_not() | logic_not());
 }
 
+namespace {
+
+// Example function with reference
+constexpr void add1(int& v) noexcept
+{
+    ++v;
+}
+
+constexpr auto add1() noexcept
 #ifdef TEST_IS_CPP20_OR_HIGHER
+    -> pipe_::constexpr_pipe_tag<void, void (&)(int&), int&>
+#else
+    -> pipe_::pipe_tag<void, void (&)(int&), int&>
+#endif
+{
+    return
+#ifdef TEST_IS_CPP20_OR_HIGHER
+        pipe_::constexpr_pipe_tag<void, void (&)(int&), int&>
+#else
+        pipe_::pipe_tag<void, void (&)(int&), int&>
+#endif
+        {add1};
+}
+
+#if (defined(TEST_IS_CPP20_OR_HIGHER) && !defined(_MSC_VER))
+consteval bool test_() noexcept
+{
+    int a = 0;
+
+    add1(a);
+    if (a != 1) {
+        return false;
+    }
+
+    a | add1();
+    if (a != 2) {
+        return false;
+    }
+
+    return true;
+}
+static_assert(test_(), "");
+#endif
+
+}  // namespace
+
+TEST(PipeTest, Add1)
+{
+    int a = 0;
+
+    add1(a);
+    EXPECT_EQ(a, 1);
+
+    a | add1();
+    EXPECT_EQ(a, 2);
+}
+
+namespace {
+namespace template_test {
+
+// Example template with 2 arguments
+template<typename T, typename U>
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto add(const T a, const U b) noexcept -> decltype(a + b)
+{
+    return a + b;
+}
+
+template<typename T, typename U>
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto add(const U b) noexcept
+#ifdef TEST_IS_CPP20_OR_HIGHER
+    -> pipe_::constexpr_pipe_tag<T, decltype(std::declval<T>() + std::declval<U>()) (&)(T, U), const T, const U>
+#else
+    -> pipe_::pipe_tag<T, decltype(std::declval<T>() + std::declval<U>()) (&)(T, U), const T, const U>
+#endif
+{
+    return
+#ifdef TEST_IS_CPP20_OR_HIGHER
+        pipe_::constexpr_pipe_tag<T, decltype(std::declval<T>() + std::declval<U>()) (&)(T, U), const T, const U>
+#else
+        pipe_::pipe_tag<T, decltype(std::declval<T>() + std::declval<U>()) (&)(T, U), const T, const U>
+#endif
+        {add<T, U>, std::forward<const U>(b)};
+}
+
+}  // namespace template_test
+}  // namespace
+
+TEST(PipeTest, TemplateAdd)
+{
+#if (defined(TEST_IS_CPP20_OR_HIGHER) && !defined(_MSC_VER))
+    constexpr std::equal_to<double> eq;
+
+    static_assert(2 == template_test::add(1, 1));
+    static_assert(2 == (1 | template_test::add<int>(1)));
+
+    static_assert(114515 == template_test::add(template_test::add(114514, 1), 0));
+    static_assert(114515 == (114514 | template_test::add<int>(1) | template_test::add<int>(0)));
+
+    static_assert(eq(2.0, template_test::add(1.0, 1)));
+    static_assert(eq(2.0, 1.0 | template_test::add<float>(1)));
+#endif
+
+    EXPECT_EQ(2, template_test::add(1, 1));
+    EXPECT_EQ(2, 1 | template_test::add<int>(1));
+
+    EXPECT_EQ(114515, template_test::add(template_test::add(114514, 1), 0));
+    EXPECT_EQ(114515, 114514 | template_test::add<int>(1) | template_test::add<int>(0));
+
+    EXPECT_EQ(2.0, template_test::add(1.0, 1));
+    EXPECT_EQ(2.0, 1.0 | template_test::add<float>(1));
+}
+
+#if (defined(TEST_IS_CPP20_OR_HIGHER) && !defined(_MSC_VER))
+
+// consteval test
+namespace {
 
 consteval int bit_or(const int a, const int b) noexcept
 {
     return a | b;
 }
 
-consteval auto bit_or(const int b) noexcept -> pipe::consteval_pipe_tag<int, int (&)(int, int), const int, const int>
+consteval auto bit_or(const int b) noexcept -> pipe_::consteval_pipe_tag<int, int (&)(int, int), const int, const int>
 {
-    return pipe::consteval_pipe_tag<int, int (&)(int, int), const int, const int>{bit_or, std::forward<const int>(b)};
+    return pipe_::consteval_pipe_tag<int, int (&)(int, int), const int, const int>{bit_or, std::forward<const int>(b)};
 }
 
 namespace test {
@@ -178,6 +305,8 @@ constexpr std::equal_to<int> eq;
 
 static_assert(test::eq(0b11, bit_or(0b01, 0b10)));
 static_assert(test::eq(0b11, 0b01 | bit_or(0b10)));
+
+}  // namespace
 
 #endif
 

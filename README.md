@@ -1,0 +1,100 @@
+# cpp_pipe_operator_helper
+
+`cpp_pipe_operator_helper` is a small C++ utility library that enables a pipe-style invocation syntax and pipe-style
+type-casts.
+
+Instead of writing traditional calls like:
+
+- `f1(x)`
+- `f2(x, y)`
+- `static_cast<int>(a)`
+
+you can write:
+
+- `x | f1()`
+- `x | f2(y)`
+- `a > static_cast_to<int>()`
+
+This can make some call-chains and transformations read left-to-right in a more natural way.
+
+## Features
+
+- Pipe-style function invocation helpers (supporting free functions and templates).
+- Pipe-style type casts: `static_cast_to`, `dynamic_cast_to`, `const_cast_to`, `reinterpret_cast_to`, `bit_cast_to`, and
+  helpers for `move_to` and `forward_to`.
+- Designed to be usable as a single header (or as a module when built that way).
+- Works with references, pointers, value types and many cast scenarios (see tests for details).
+
+## Quick usage
+
+- Include the header:
+
+  `#include "pipe_operator_helper.hpp"`
+
+  or, when using C++ modules (if configured):
+
+  `import pipe_operator_helper;`
+
+- Function piping:
+    - Define a normal function `int add(int a, int b)` and provide an overload `auto add(int b)` that returns the
+      appropriate `pipe_tag`/`constexpr_pipe_tag`(C++20)/`consteval_pipe_tag`(C++20) wrapper. For example:
+
+    ```C++
+    constexpr int add(const int a, const int b) noexcept { return a + b; }
+    
+    constexpr auto add(const int b) noexcept
+        -> pipe_operator_helper::constexpr_pipe_tag<int, int (&)(int, int), const int, const int>
+    {
+        return pipe_operator_helper::constexpr_pipe_tag<int, int (&)(int, int), const int, const int>
+            {add, std::forward<const int>(b)};
+    }
+    ```
+
+  Note: constexpr/consteval requires C++20 or higher and MSVC was not supported. If you do not use constexpr,
+  just replace `constexpr_pipe_tag` into `pipe_tag`.
+
+    - Then, you can use both `add(x, y)` and `x | add(y)`.
+
+- Type-cast operators:
+    - Instead of `static_cast<T>(v)` use `v > pipe_operator_helper::static_cast_to<T>()` or
+      `v > pipe_operator_helper::cast_to<T>()` (`cast_to` has the same effect with `static_cast_to`).
+    - Similarly, there are `dynamic_cast_to<T>()`, `const_cast_to<T>()`, `reinterpret_cast_to<T>()` and
+      `bit_cast_to<T>()` utilities.
+    - `std::move` and `std::forward` has type-cast operators too:
+        - `v > pipe_operator_helper::move_to()` has same effect with `std::move(v)`.
+        - `v > pipe_operator_helper::forward_to<T>()` has same effect with `std::forward<T>(v)`.
+
+## Build & test
+
+- This project uses CMake. A common workflow is:
+
+```Shell
+cmake -S . -B build
+cmake --build build
+```
+
+- Run tests with CTest (from the build directory):
+
+```Shell
+cmake -S . -B build -DCPP_PIPE_OPERATOR_HELPER_BUILD_TESTS=ON
+cmake --build build
+ctest --test-dir build
+```
+
+## Notes & tips
+
+- The library exposes both header-only and module-only usage. If your toolchain supports C++20 modules and the project
+  is configured to build the module(`-DCPP_PIPE_OPERATOR_HELPER_USE_MODULES=ON`), you can import `pipe_operator_helper`
+  instead of including the header.
+- Many of the helper wrappers in the tests use explicit `pipe_tag`/`constexpr_pipe_tag`/`consteval_pipe_tag` types —
+  these patterns are demonstrated in `test/pipe_operator_test.cpp` and are a good reference when adapting your own
+  functions.
+
+## Contributing
+
+Fixes, improvements and additional tests are welcome. Please follow the repository coding style and add tests for new
+behaviors.
+
+## License
+
+See the `LICENSE` file in the repository for license details.
