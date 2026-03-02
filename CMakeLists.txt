@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.28...4.0)
 
-project(cpp_pipe_operator_helper CXX)
+file(READ "version.txt" cppPipeOperatorHelperVersion)
+
+project(cpp_pipe_operator_helper
+    LANGUAGES CXX
+    VERSION "${cppPipeOperatorHelperVersion}"
+)
+
+message(STATUS "[${PROJECT_NAME}]: Version: ${PROJECT_VERSION}")
 
 option(CPP_PIPE_OPERATOR_HELPER_USE_MODULES
     "Use C++20 modules for cpp_pipe_operator_helper"
@@ -36,6 +43,13 @@ if (CPP_PIPE_OPERATOR_HELPER_USE_MODULES)
             pipe_operator_helper.cppm
     )
 else ()
+    if (CPP_PIPE_OPERATOR_HELPER_BUILD_SHARED)
+        message(WARNING "[${PROJECT_NAME}]: `CPP_PIPE_OPERATOR_HELPER_BUILD_SHARED` ignored "
+            "because `CPP_PIPE_OPERATOR_HELPER_USE_MODULES` was OFF. Set "
+            "`CPP_PIPE_OPERATOR_HELPER_BUILD_SHARED` OFF to avoid this warning."
+        )
+    endif ()
+
     add_library(${PROJECT_NAME} INTERFACE)
     target_include_directories(${PROJECT_NAME} INTERFACE include)
 

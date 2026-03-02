@@ -3,6 +3,8 @@
  * @brief
  */
 
+// NOLINTBEGIN(*-use-transparent-functors)
+
 #ifndef TEST_USE_MODULE
 #include "pipe_operator_helper.hpp"
 #endif
@@ -178,3 +180,5 @@ static_assert(test::eq(0b11, bit_or(0b01, 0b10)));
 static_assert(test::eq(0b11, 0b01 | bit_or(0b10)));
 
 #endif
+
+// NOLINTEND(*-use-transparent-functors)
