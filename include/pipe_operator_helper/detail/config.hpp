@@ -7,8 +7,8 @@
 #ifndef CPP_PIPE_OPERATOR_HELPER_DETAIL_CONFIG_HPP
 #define CPP_PIPE_OPERATOR_HELPER_DETAIL_CONFIG_HPP
 
-#if (__cplusplus < 201103L)
-#error "Library `cpp_pipe_operator_helper` requires C++11 or higher."
+#if (__cplusplus < 201703L)
+#error "Library `cpp_pipe_operator_helper` requires C++17 or higher."
 #endif
 
 #if (__cplusplus >= 201402L)
