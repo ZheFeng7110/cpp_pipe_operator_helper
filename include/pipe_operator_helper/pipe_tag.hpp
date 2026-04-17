@@ -19,7 +19,6 @@
 #endif
 
 namespace pipe_operator_helper {
-
 namespace detail {
 
 template<typename Func, typename First, typename... Remains>
@@ -47,6 +46,16 @@ struct is_invoke_with_1arg_1tuple_noexcept<Func, First, const std::tuple<Remains
 };
 
 template<typename Func, typename First, typename... Remains>
+struct is_invoke_with_1arg_1tuple_noexcept<Func, First, std::tuple<Remains...>&&>
+    : std::is_nothrow_invocable<Func, First, Remains&&...> {
+};
+
+template<typename Func, typename First, typename... Remains>
+struct is_invoke_with_1arg_1tuple_noexcept<Func, First, const std::tuple<Remains...>&&>
+    : std::is_nothrow_invocable<Func, First, const Remains&&...> {
+};
+
+template<typename Func, typename First, typename... Remains>
 constexpr bool is_invoke_with_1arg_1tuple_noexcept_v =
     is_invoke_with_1arg_1tuple_noexcept<Func, First, Remains...>::value;
 
@@ -66,7 +75,7 @@ inline PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR decltype(auto) invoke_with_1arg_1tup
                                                                                    First&& first,
                                                                                    Tuple&& tuple)
 {
-    constexpr auto tuple_size = std::tuple_size<typename std::remove_reference<Tuple>::type>::value;
+    constexpr auto tuple_size = std::tuple_size_v<std::remove_reference_t<Tuple>>;
     return invoke_with_1arg_1tuple_impl(std::forward<Func>(func),
                                         std::forward<First>(first),
                                         std::forward<Tuple>(tuple),
@@ -77,77 +86,148 @@ inline PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR decltype(auto) invoke_with_1arg_1tup
 
 PIPE_OPERATOR_HELPER_MODULE_EXPORT_BEGIN
 
-template<typename R, typename Func, typename FirstArg, typename... RemainArgs>
+template<typename Func, typename... SecondAndSubsequentArgs>
 class pipe_tag
 {
 public:
-    using return_type = R;
     using function_type = Func;
+    using second_and_subsequent_args_type = std::tuple<SecondAndSubsequentArgs...>;
 
 protected:
-    function_type& func_;
-    std::tuple<RemainArgs...> remain_args_;
+    function_type func_;
+    second_and_subsequent_args_type remain_args_;
 
 public:
-    explicit constexpr pipe_tag(Func&& func, RemainArgs&&... remain_args) noexcept
-        : func_{std::forward<Func>(func)}, remain_args_{std::forward<RemainArgs>(remain_args)...}
+    // ReSharper disable once CppNonExplicitConvertingConstructor
+    constexpr pipe_tag(Func&& func, SecondAndSubsequentArgs&&... second_and_subsequent_args) noexcept
+        : func_{std::forward<Func>(func)},
+          remain_args_{std::forward<SecondAndSubsequentArgs>(second_and_subsequent_args)...}
     {
     }
 
-    friend return_type operator|(FirstArg&& first_arg, const pipe_tag& pipe) noexcept(
-        detail::is_invoke_with_1arg_1tuple_noexcept_v<Func, FirstArg, decltype(pipe.remain_args_)>)
+    constexpr const second_and_subsequent_args_type& get_remain_args() const& noexcept
     {
-        return detail::invoke_with_1arg_1tuple(std::forward<Func>(pipe.func_),
-                                               std::forward<FirstArg>(first_arg),
-                                               pipe.remain_args_);
+        return remain_args_;
+    }
+    constexpr second_and_subsequent_args_type& get_remain_args() & noexcept
+    {
+        return remain_args_;
+    }
+    constexpr second_and_subsequent_args_type&& get_remain_args() && noexcept
+    {
+        return std::move(remain_args_);
+    }
+
+    constexpr const function_type& get_function() const& noexcept
+    {
+        return func_;
+    }
+    constexpr function_type& get_function() & noexcept
+    {
+        return func_;
+    }
+    constexpr function_type&& get_function() && noexcept
+    {
+        return std::move(func_);
     }
 };
+
+template<typename FirstArg, typename Func, typename... SecondAndSubsequentArgs>
+inline decltype(auto)
+operator|(FirstArg&& first_arg, const pipe_tag<Func, SecondAndSubsequentArgs...>& pipe_tag_value) noexcept(
+    detail::is_invoke_with_1arg_1tuple_noexcept_v<Func, FirstArg, decltype(pipe_tag_value.get_remain_args())>)
+{
+    return detail::invoke_with_1arg_1tuple(std::forward<Func>(pipe_tag_value.get_function()),
+                                           std::forward<FirstArg>(first_arg),
+                                           pipe_tag_value.get_remain_args());
+}
+template<typename FirstArg, typename Func, typename... SecondAndSubsequentArgs>
+inline decltype(auto)
+operator|(FirstArg&& first_arg, pipe_tag<Func, SecondAndSubsequentArgs...>&& pipe_tag_value) noexcept(
+    detail::
+        is_invoke_with_1arg_1tuple_noexcept_v<Func, FirstArg, decltype(std::move(pipe_tag_value).get_remain_args())>)
+{
+    return detail::invoke_with_1arg_1tuple(std::forward<Func>(std::move(pipe_tag_value).get_function()),
+                                           std::forward<FirstArg>(first_arg),
+                                           std::move(pipe_tag_value).get_remain_args());
+}
 
 #if (__cplusplus >= 202002L)
 
-template<typename R, typename Func, typename FirstArg, typename... RemainArgs>
-class constexpr_pipe_tag : public pipe_tag<R, Func, FirstArg, RemainArgs...>
+// For constexpr
+template<typename Func, typename... SecondAndSubsequentArgs>
+class constexpr_pipe_tag : public pipe_tag<Func, SecondAndSubsequentArgs...>
 {
 private:
-    using super_type_ = pipe_tag<R, Func, FirstArg, RemainArgs...>;
+    using super_ = pipe_tag<Func, SecondAndSubsequentArgs...>;
 
 public:
-    using return_type = typename super_type_::return_type;
-    using function_type = typename super_type_::function_type;
-
-    using super_type_::super_type_;
-
-    friend constexpr return_type operator|(FirstArg&& first_arg, const constexpr_pipe_tag& pipe) noexcept(
-        detail::is_invoke_with_1arg_1tuple_noexcept_v<Func, FirstArg, decltype(pipe.remain_args_)>)
-    {
-        return detail::invoke_with_1arg_1tuple(std::forward<Func>(pipe.func_),
-                                               std::forward<FirstArg>(first_arg),
-                                               pipe.remain_args_);
-    }
+    using super_::super_;
 };
 
-template<typename R, typename Func, typename FirstArg, typename... RemainArgs>
-class consteval_pipe_tag : public pipe_tag<R, Func, FirstArg, RemainArgs...>
+template<typename FirstArg, typename Func, typename... SecondAndSubsequentArgs>
+inline constexpr decltype(auto)
+operator|(FirstArg&& first_arg, const constexpr_pipe_tag<Func, SecondAndSubsequentArgs...>& pipe_tag_value) noexcept(
+    detail::is_invoke_with_1arg_1tuple_noexcept_v<Func, FirstArg, decltype(pipe_tag_value.get_remain_args())>)
+{
+    return detail::invoke_with_1arg_1tuple(std::forward<Func>(pipe_tag_value.get_function()),
+                                           std::forward<FirstArg>(first_arg),
+                                           pipe_tag_value.get_remain_args());
+}
+template<typename FirstArg, typename Func, typename... SecondAndSubsequentArgs>
+inline constexpr decltype(auto)
+operator|(FirstArg&& first_arg, constexpr_pipe_tag<Func, SecondAndSubsequentArgs...>&& pipe_tag_value) noexcept(
+    detail::
+        is_invoke_with_1arg_1tuple_noexcept_v<Func, FirstArg, decltype(std::move(pipe_tag_value).get_remain_args())>)
+{
+    return detail::invoke_with_1arg_1tuple(std::forward<Func>(std::move(pipe_tag_value).get_function()),
+                                           std::forward<FirstArg>(first_arg),
+                                           std::move(pipe_tag_value).get_remain_args());
+}
+
+// For consteval
+template<typename Func, typename... SecondAndSubsequentArgs>
+class consteval_pipe_tag : public pipe_tag<Func, SecondAndSubsequentArgs...>
 {
 private:
-    using super_type_ = pipe_tag<R, Func, FirstArg, RemainArgs...>;
+    using super_ = pipe_tag<Func, SecondAndSubsequentArgs...>;
 
 public:
-    using return_type = typename super_type_::return_type;
-    using function_type = typename super_type_::function_type;
-
-    using super_type_::super_type_;
-
-    friend consteval return_type operator|(FirstArg&& first_arg, const consteval_pipe_tag& pipe) noexcept(
-        detail::is_invoke_with_1arg_1tuple_noexcept_v<Func, FirstArg, decltype(pipe.remain_args_)>)
-    {
-        return detail::invoke_with_1arg_1tuple(std::forward<Func>(pipe.func_),
-                                               std::forward<FirstArg>(first_arg),
-                                               pipe.remain_args_);
-    }
+    using super_::super_;
 };
 
-#endif
+template<typename FirstArg, typename Func, typename... SecondAndSubsequentArgs>
+inline consteval decltype(auto)
+operator|(FirstArg&& first_arg, const consteval_pipe_tag<Func, SecondAndSubsequentArgs...>& pipe_tag_value) noexcept(
+    detail::is_invoke_with_1arg_1tuple_noexcept_v<Func, FirstArg, decltype(pipe_tag_value.get_remain_args())>)
+{
+    return detail::invoke_with_1arg_1tuple(std::forward<Func>(pipe_tag_value.get_function()),
+                                           std::forward<FirstArg>(first_arg),
+                                           pipe_tag_value.get_remain_args());
+}
+template<typename FirstArg, typename Func, typename... SecondAndSubsequentArgs>
+inline consteval decltype(auto)
+operator|(FirstArg&& first_arg, consteval_pipe_tag<Func, SecondAndSubsequentArgs...>&& pipe_tag_value) noexcept(
+    detail::
+        is_invoke_with_1arg_1tuple_noexcept_v<Func, FirstArg, decltype(std::move(pipe_tag_value).get_remain_args())>)
+{
+    return detail::invoke_with_1arg_1tuple(std::forward<Func>(std::move(pipe_tag_value).get_function()),
+                                           std::forward<FirstArg>(first_arg),
+                                           std::move(pipe_tag_value).get_remain_args());
+}
+
+#endif  // (__cplusplus >= 202002L)
+
+template<typename T>
+constexpr decltype(auto) forward_arg(std::remove_reference_t<T>& value) noexcept
+{
+    return std::forward<T>(value);
+}
+template<typename T>
+constexpr decltype(auto) forward_arg(std::remove_reference_t<T>&& value) noexcept
+{
+    return std::forward<T>(value);
+}
 
 PIPE_OPERATOR_HELPER_MODULE_EXPORT_END
 

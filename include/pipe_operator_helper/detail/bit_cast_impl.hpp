@@ -18,8 +18,7 @@
 #endif
 #endif
 
-namespace pipe_operator_helper {
-namespace detail {
+namespace pipe_operator_helper::detail {
 
 template<typename To, typename From>
 PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR To bit_cast_impl(const From& from) noexcept
@@ -39,7 +38,6 @@ PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR To bit_cast_impl(const From& from) noexcept
 #endif
 }
 
-}  // namespace detail
-}  // namespace pipe_operator_helper
+}  // namespace pipe_operator_helper::detail
 
 #endif  // !CPP_PIPE_OPERATOR_HELPER_BIT_CAST_IMPL_HPP

@@ -11,12 +11,6 @@
 #error "Library `cpp_pipe_operator_helper` requires C++17 or higher."
 #endif
 
-#if (__cplusplus >= 201402L)
-#define PIPE_OPERATOR_HELPER_CPP14_CONSTEXPR constexpr
-#else
-#define PIPE_OPERATOR_HELPER_CPP14_CONSTEXPR
-#endif
-
 #if (__cplusplus >= 202002L)
 #define PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR constexpr
 #else
