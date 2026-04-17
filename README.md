@@ -43,10 +43,9 @@ This can make some call-chains and transformations read left-to-right in a more 
     constexpr int add(const int a, const int b) noexcept { return a + b; }
     
     constexpr auto add(const int b) noexcept
-        -> pipe_operator_helper::constexpr_pipe_tag<int, int (&)(int, int), const int, const int>
+        -> pipe_operator_helper::constexpr_pipe_tag<int (&)(int, int), const int>
     {
-        return pipe_operator_helper::constexpr_pipe_tag<int, int (&)(int, int), const int, const int>
-            {add, std::forward<const int>(b)};
+        return {add, pipe_operator_helper::forward_arg<const int>(b)};
     }
     ```
 
