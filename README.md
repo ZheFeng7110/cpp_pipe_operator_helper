@@ -36,24 +36,21 @@ This can make some call-chains and transformations read left-to-right in a more 
   `import pipe_operator_helper;`
 
 - Function piping:
-    - Define a normal function `int add(int a, int b)` and provide an overload `auto add(int b)` that returns the
-      appropriate `pipe_tag`/`constexpr_pipe_tag`(C++20)/`consteval_pipe_tag`(C++20) wrapper. For example:
+    - Define a normal function (for example, `int add(int a, int b)`) and provide a helper overload that returns a
+      `pipe_tag` wrapping a callable that takes the left-hand argument.
 
     ```C++
     constexpr int add(const int a, const int b) noexcept { return a + b; }
-    
+
     constexpr auto add(const int b) noexcept
-        -> pipe_operator_helper::constexpr_pipe_tag<int, int (&)(int, int), const int, const int>
     {
-        return pipe_operator_helper::constexpr_pipe_tag<int, int (&)(int, int), const int, const int>
-            {add, std::forward<const int>(b)};
+        return pipe_operator_helper::pipe_tag{[=](const int a) noexcept { return add(a, b); }};
     }
     ```
 
-  Note: constexpr/consteval requires C++20 or higher and MSVC was not supported. If you do not use constexpr,
-  just replace `constexpr_pipe_tag` into `pipe_tag`.
-
-    - Then, you can use both `add(x, y)` and `x | add(y)`.
+    - Then you can use both `add(x, y)` and `x | add(y)`.
+    - The same pattern works for references, templates, `constexpr`, and `consteval` helpers (see
+      `test/pipe_operators_tests/1arg.cpp` and `test/pipe_operators_tests/2args.cpp`).
 
 - Type-cast operators:
     - Instead of `static_cast<T>(v)` use `v > pipe_operator_helper::static_cast_to<T>()` or
@@ -86,9 +83,10 @@ ctest --test-dir build
 - The library exposes both header-only and module-only usage. If your toolchain supports C++20 modules and the project
   is configured to build the module(`-DCPP_PIPE_OPERATOR_HELPER_USE_MODULES=ON`), you can import `pipe_operator_helper`
   instead of including the header.
-- Many of the helper wrappers in the tests use explicit `pipe_tag`/`constexpr_pipe_tag`/`consteval_pipe_tag` types —
-  these patterns are demonstrated in `test/pipe_operator_test.cpp` and are a good reference when adapting your own
-  functions.
+- For up-to-date usage patterns, check:
+  - `test/pipe_operators_tests/1arg.cpp`
+  - `test/pipe_operators_tests/2args.cpp`
+  - `test/type_cast_test.cpp`
 
 ## Contributing
 
