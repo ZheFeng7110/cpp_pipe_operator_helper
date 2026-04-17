@@ -72,6 +72,7 @@ constexpr auto add1() noexcept
     return pipe_::pipe_tag{[](int& v) noexcept { add1(v); }};
 }
 
+#ifdef TEST_IS_CPP20_OR_HIGHER
 consteval bool test_() noexcept
 {
     int a = 0;
@@ -89,6 +90,7 @@ consteval bool test_() noexcept
     return true;
 }
 static_assert(test_(), "");
+#endif
 
 }  // namespace
 
