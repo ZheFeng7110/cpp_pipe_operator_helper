@@ -81,7 +81,6 @@ jobs:
       - name: XMake Config
         run: >
           xmake f --cxx=g++-14 --ld=g++-14
-          --modules=y
           --test=y
           --verbose --builddir=build-xmake
 

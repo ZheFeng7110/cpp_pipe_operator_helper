@@ -3,7 +3,6 @@ add_requires("gtest v1.17.0", {configs = {gmock = false}})
 target("cpp_pipe_operator_helper_test", function ()
     set_kind("binary")
     set_languages("cxx20")
-    set_policy("build.c++.modules", true)
 
     if has_config("vs") then
         add_cxxflags("/Zc:__cplusplus")
