@@ -2,7 +2,7 @@ set_xmakever("3.0.5")
 
 local project_name = "cpp_pipe_operator_helper"
 set_project(project_name)
-set_version("0.0.0")
+set_version("1.0.0")
 
 option(project_name .. "-use-modules", function ()
     set_description("Use C++20 modules for library `" .. project_name .. "`.")

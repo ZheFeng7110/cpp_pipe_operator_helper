@@ -15,7 +15,7 @@ set_property(CACHE CPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD
 )
 
 if ((${CPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD} LESS 20) AND
-    (CPP_PIPE_OPERATOR_HELPER_USE_MODULES))
+(CPP_PIPE_OPERATOR_HELPER_USE_MODULES))
     message(FATAL_ERROR "Use modules requires C++20 or higher!")
 endif ()
 
@@ -48,30 +48,33 @@ else ()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif ()
 
-function (declareTest testName cppStandard)
-    set(testProjectName "${PROJECT_NAME}_${testName}")
+set(testProjectName ${PROJECT_NAME})
+set(cppStandard "${CPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD}")
 
-    add_executable(${testProjectName} type_cast_test.cpp pipe_operator_test.cpp)
+add_executable(${testProjectName})
 
-    message(DEBUG "Binary dir: ${CMAKE_CURRENT_BINARY_DIR}")
+file(GLOB_RECURSE pipeTestSources "pipe_operators_tests/*.cpp")
+target_sources(${testProjectName}
+    PRIVATE type_cast_test.cpp ${pipeTestSources}
+    PRIVATE FILE_SET headers TYPE HEADERS FILES gtest_pch.hpp
+)
 
-    if ((${cppStandard} GREATER_EQUAL 20) AND (CPP_PIPE_OPERATOR_HELPER_USE_MODULES))
-        set(CMAKE_CXX_SCAN_FOR_MODULES ON CACHE INTERNAL "" FORCE)
-        target_compile_definitions(${testProjectName} PRIVATE TEST_USE_MODULE)
-    endif ()
+message(DEBUG "Binary dir: ${CMAKE_CURRENT_BINARY_DIR}")
 
-    target_link_libraries(${testProjectName} PRIVATE cpp_pipe_operator_helper
-        GTest::gtest_main
-    )
+if ((${cppStandard} GREATER_EQUAL 20) AND (CPP_PIPE_OPERATOR_HELPER_USE_MODULES))
+    set(CMAKE_CXX_SCAN_FOR_MODULES ON CACHE INTERNAL "" FORCE)
+    target_compile_definitions(${testProjectName} PRIVATE TEST_USE_MODULE)
+endif ()
 
-    if (NOT MSVC AND (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang"))
-        find_package(Threads REQUIRED)
-        target_link_libraries(${testProjectName} PRIVATE Threads::Threads)
-    endif ()
+target_link_libraries(${testProjectName} PRIVATE cpp_pipe_operator_helper
+    GTest::gtest_main
+)
 
-    target_precompile_headers(${testProjectName} PRIVATE gtest_pch.hpp)
+if (NOT MSVC AND (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang"))
+    find_package(Threads REQUIRED)
+    target_link_libraries(${testProjectName} PRIVATE Threads::Threads)
+endif ()
 
-    gtest_discover_tests(${testProjectName})
-endfunction ()
+target_precompile_headers(${testProjectName} PRIVATE gtest_pch.hpp)
 
-declareTest("all" "${CPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD}")
+gtest_discover_tests(${testProjectName})
