@@ -22,17 +22,25 @@
 import pipe_operator_helper;
 #endif
 
+#ifndef PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR
+#if (__cplusplus >= 202002L)
+#define PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR constexpr
+#else
+#define PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR
+#endif
+#endif  // !PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR
+
 namespace {
 
 namespace pipe_ = pipe_operator_helper;
 
 // Example function with 2 arguments
-constexpr int add(const int a, const int b) noexcept
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR int add(const int a, const int b) noexcept
 {
     return a + b;
 }
 
-constexpr auto add(const int b) noexcept
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto add(const int b) noexcept
 {
     return pipe_::pipe_tag{[=](const int a) noexcept { return add(a, b); }};
 }
@@ -41,11 +49,13 @@ constexpr auto add(const int b) noexcept
 
 TEST(Pipe2ArgsTest, TypicalAdd)
 {
+#ifdef TEST_IS_CPP20_OR_HIGHER
     static_assert(2 == add(1, 1));
     static_assert(2 == (1 | add(1)));
 
     static_assert(114515 == add(add(114514, 1), 0));
     static_assert(114515 == (114514 | add(1) | add(0)));
+#endif
 
     EXPECT_TRUE(noexcept(add(1, 1)));
     EXPECT_TRUE(noexcept(1 | add(1)));
@@ -60,7 +70,7 @@ TEST(Pipe2ArgsTest, TypicalAdd)
 namespace {
 
 // Example function used exception
-constexpr int divide(const int a, const int b)
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR int divide(const int a, const int b)
 {
     if (b == 0) {
         throw std::logic_error("divide by zero");
@@ -68,7 +78,7 @@ constexpr int divide(const int a, const int b)
     return a / b;
 }
 
-constexpr auto divide(const int b)
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto divide(const int b)
 {
     return pipe_::pipe_tag{[=](const int a) { return divide(a, b); }};
 }
@@ -77,6 +87,7 @@ constexpr auto divide(const int b)
 
 TEST(Pipe2ArgsTest, ExceptionTest)
 {
+#ifdef TEST_IS_CPP20_OR_HIGHER
     constexpr std::equal_to<int> eq;
 
     static_assert(requires { divide(1, 0); });
@@ -87,6 +98,7 @@ TEST(Pipe2ArgsTest, ExceptionTest)
 
     static_assert(eq(-1, divide(divide(4, 2), -2)));
     static_assert(eq(-1, 4 | divide(2) | divide(-2)));
+#endif
 
     EXPECT_FALSE(noexcept(divide(1, 1)));
     EXPECT_FALSE(noexcept(1 | divide(1)));
@@ -109,13 +121,13 @@ namespace template_test {
 
 // Example template with 2 arguments
 template<typename T, typename U>
-constexpr auto add(const T a, const U b) noexcept -> decltype(a + b)
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto add(const T a, const U b) noexcept -> decltype(a + b)
 {
     return a + b;
 }
 
 template<typename T, typename U>
-constexpr auto add(const U b) noexcept
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto add(const U b) noexcept
 {
     return pipe_::pipe_tag{[=](const T a) noexcept { return add<T, U>(a, b); }};
 }
@@ -125,6 +137,7 @@ constexpr auto add(const U b) noexcept
 
 TEST(Pipe2ArgsTest, TemplateAdd)
 {
+#ifdef TEST_IS_CPP20_OR_HIGHER
     constexpr std::equal_to<double> eq;
 
     static_assert(2 == template_test::add(1, 1));
@@ -135,6 +148,7 @@ TEST(Pipe2ArgsTest, TemplateAdd)
 
     static_assert(eq(2.0, template_test::add(1.0, 1)));
     static_assert(eq(2.0, 1.0 | template_test::add<double>(1)));
+#endif
 
     EXPECT_TRUE(noexcept(template_test::add(1, 1)));
     EXPECT_TRUE(noexcept(1 | template_test::add<int>(1)));
@@ -184,14 +198,14 @@ static_assert(test::eq(0b11, 0b01 | bit_or(0b10)));
 // tests for reference
 namespace {
 
-constexpr void swap(int& a, int& b) noexcept
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR void swap(int& a, int& b) noexcept
 {
     const auto tmp = a;
     a = b;
     b = tmp;
 }
 
-constexpr auto swap(int& b) noexcept
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto swap(int& b) noexcept
 {
     return pipe_::pipe_tag{[&](int& a) noexcept { ::swap(a, b); }};
 }
@@ -214,13 +228,13 @@ TEST(Pipe2ArgsTest, ReferenceTest)
 // callable object
 namespace {
 
-constexpr struct Multiply {
-    constexpr int operator()(const int a, const int b) const noexcept
+PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR struct Multiply {
+    PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR int operator()(const int a, const int b) const noexcept
     {
         return a * b;
     }
 
-    constexpr auto operator()(const int b) const noexcept
+    PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto operator()(const int b) const noexcept
     {
         return pipe_::pipe_tag{[this, b](const int a) noexcept { return this->operator()(a, b); }};
     }
@@ -230,8 +244,10 @@ constexpr struct Multiply {
 
 TEST(Pipe2ArgsTest, CallableObjectTest)
 {
+#ifdef TEST_IS_CPP20_OR_HIGHER
     static_assert(6 == multiply(2, 3));
     static_assert(6 == (2 | multiply(3)));
+#endif
 
     EXPECT_TRUE(noexcept(multiply(2, 3)));
     EXPECT_TRUE(noexcept(2 | multiply(3)));
