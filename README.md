@@ -88,6 +88,10 @@ ctest --test-dir build
   - `test/pipe_operators_tests/2args.cpp`
   - `test/type_cast_test.cpp`
 
+## Special Thanks
+
+* The implementation of v1.x.x was inspired by [wzxzhuxi/cpp-functional-programming](https://github.com/wzxzhuxi/cpp-functional-programming/tree/main/06-composition).
+
 ## Contributing
 
 Fixes, improvements and additional tests are welcome. Please follow the repository coding style and add tests for new
