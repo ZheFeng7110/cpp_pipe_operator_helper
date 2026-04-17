@@ -2,9 +2,13 @@ name: Unit Test
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - develop
   pull_request:
-    branches: ["main"]
+    branches:
+      - develop
+    types:
+      - closed
 
 jobs:
   on-ubuntu:

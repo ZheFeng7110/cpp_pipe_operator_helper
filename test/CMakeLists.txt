@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.28...4.0)
 
 project(cpp_pipe_operator_helper_test CXX)
 
+message(STATUS "Configuring ${PROJECT_NAME}")
+list(APPEND CMAKE_MESSAGE_INDENT "    ")
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD 11 CACHE STRING
@@ -11,7 +14,8 @@ set_property(CACHE CPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD
     PROPERTY STRINGS "17;20;23"
 )
 
-if ((${cppStandard} LESS 20) AND (CPP_PIPE_OPERATOR_HELPER_USE_MODULES))
+if ((${CPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD} LESS 20) AND
+    (CPP_PIPE_OPERATOR_HELPER_USE_MODULES))
     message(FATAL_ERROR "Use modules requires C++20 or higher!")
 endif ()
 
@@ -19,7 +23,24 @@ set(CMAKE_CXX_STANDARD "${CPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD}"
     CACHE INTERNAL "" FORCE
 )
 
-include("find_gtest.cmake")
+include("get_cpm.cmake")
+
+block (SCOPE_FOR POLICIES)
+    cmake_policy(VERSION 3.28...4.0.1)
+
+    CPMAddPackage(
+        NAME googletest
+        GITHUB_REPOSITORY google/googletest
+        GIT_TAG "v1.17.0"
+        VERSION 1.17.0
+        OPTIONS "BUILD_GMOCK OFF" "INSTALL_GTEST OFF"
+    )
+
+    if (NOT googletest_ADDED)
+        message(FATAL_ERROR "Failed to add googletest")
+    endif ()
+endblock ()
+include(GoogleTest)
 
 if (MSVC)
     add_compile_options(/W4 /Zc:__cplusplus)
@@ -32,7 +53,7 @@ function (declareTest testName cppStandard)
 
     add_executable(${testProjectName} type_cast_test.cpp pipe_operator_test.cpp)
 
-    message(DEBUG "[${PROJECT_NAME}]: Binary dir: ${CMAKE_CURRENT_BINARY_DIR}")
+    message(DEBUG "Binary dir: ${CMAKE_CURRENT_BINARY_DIR}")
 
     if ((${cppStandard} GREATER_EQUAL 20) AND (CPP_PIPE_OPERATOR_HELPER_USE_MODULES))
         set(CMAKE_CXX_SCAN_FOR_MODULES ON CACHE INTERNAL "" FORCE)
@@ -40,7 +61,7 @@ function (declareTest testName cppStandard)
     endif ()
 
     target_link_libraries(${testProjectName} PRIVATE cpp_pipe_operator_helper
-        GTest::gtest GTest::gtest_main
+        GTest::gtest_main
     )
 
     if (NOT MSVC AND (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang"))
@@ -50,10 +71,7 @@ function (declareTest testName cppStandard)
 
     target_precompile_headers(${testProjectName} PRIVATE gtest_pch.hpp)
 
-    add_test(NAME ${testProjectName}
-        COMMAND ${testProjectName}
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    )
+    gtest_discover_tests(${testProjectName})
 endfunction ()
 
 declareTest("all" "${CPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD}")

@@ -7,7 +7,8 @@ project(cpp_pipe_operator_helper
     VERSION "${cppPipeOperatorHelperVersion}"
 )
 
-message(STATUS "[${PROJECT_NAME}]: Version: ${PROJECT_VERSION}")
+message(STATUS "Configuring ${PROJECT_NAME}@${PROJECT_VERSION}")
+list(APPEND CMAKE_MESSAGE_INDENT "    ")
 
 option(CPP_PIPE_OPERATOR_HELPER_USE_MODULES
     "Use C++20 modules for cpp_pipe_operator_helper"
@@ -31,14 +32,14 @@ endif ()
 if (CPP_PIPE_OPERATOR_HELPER_USE_MODULES)
     if (CPP_PIPE_OPERATOR_HELPER_BUILD_SHARED)
         add_library(${PROJECT_NAME} SHARED)
-        message(STATUS "[${PROJECT_NAME}]: provides module with shared library.")
+        message(STATUS "Provides module with shared library.")
 
         if (MSVC)
         target_sources(${PROJECT_NAME} PRIVATE src/dll_dummy_export.cpp)
         endif ()
     else ()
         add_library(${PROJECT_NAME} STATIC)
-        message(STATUS "[${PROJECT_NAME}]: provides module with static library.")
+        message(STATUS "Provides module with static library.")
     endif ()
 
     if (MSVC)
@@ -52,7 +53,7 @@ if (CPP_PIPE_OPERATOR_HELPER_USE_MODULES)
     )
 else ()
     if (CPP_PIPE_OPERATOR_HELPER_BUILD_SHARED)
-        message(WARNING "[${PROJECT_NAME}]: `CPP_PIPE_OPERATOR_HELPER_BUILD_SHARED` ignored "
+        message(WARNING "`CPP_PIPE_OPERATOR_HELPER_BUILD_SHARED` ignored "
             "because `CPP_PIPE_OPERATOR_HELPER_USE_MODULES` was OFF. Set "
             "`CPP_PIPE_OPERATOR_HELPER_BUILD_SHARED` OFF to avoid this warning."
         )
@@ -61,5 +62,5 @@ else ()
     add_library(${PROJECT_NAME} INTERFACE)
     target_include_directories(${PROJECT_NAME} INTERFACE include)
 
-    message(STATUS "[${PROJECT_NAME}]: provides headers.")
+    message(STATUS "Provides headers.")
 endif ()
