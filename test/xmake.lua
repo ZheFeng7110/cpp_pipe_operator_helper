@@ -11,7 +11,6 @@ target("cpp_pipe_operator_helper_test", function ()
     add_packages("gtest")
     add_deps("cpp_pipe_operator_helper")
 
-    add_defines("TEST_USE_MODULE")
     add_files("*.cpp", "pipe_operators_tests/*.cpp")
     add_includedirs("./")
 end)
