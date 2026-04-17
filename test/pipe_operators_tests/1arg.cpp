@@ -36,13 +36,8 @@ PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR bool logic_not(const bool b) noexcept
 }
 
 PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto logic_not() noexcept
-#ifdef TEST_IS_CPP20_OR_HIGHER
-    -> pipe_::constexpr_pipe_tag<bool (&)(bool) noexcept>
-#else
-    -> pipe_::pipe_tag<bool (&)(bool) noexcept>
-#endif
 {
-    return {::logic_not};
+    return pipe_::pipe_tag{[](const bool b) noexcept { return logic_not(b); }};
 }
 
 }  // namespace
@@ -78,13 +73,8 @@ constexpr void add1(int& v) noexcept
 }
 
 constexpr auto add1() noexcept
-#ifdef TEST_IS_CPP20_OR_HIGHER
-    -> pipe_::constexpr_pipe_tag<void (&)(int&) noexcept>
-#else
-    -> pipe_::pipe_tag<void (&)(int&) noexcept>
-#endif
 {
-    return {add1};
+    return pipe_::pipe_tag{[](int& v) noexcept { add1(v); }};
 }
 
 #if (defined(TEST_IS_CPP20_OR_HIGHER) && !defined(_MSC_VER))

@@ -1,6 +1,6 @@
 /**
  * @file type_cast.hpp
- * @brief
+ * @brief The implementations for type-cast operators
  */
 
 // ReSharper disable CppRedundantInlineSpecifier

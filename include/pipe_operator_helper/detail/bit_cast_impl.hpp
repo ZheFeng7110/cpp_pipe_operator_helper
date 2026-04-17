@@ -1,7 +1,9 @@
 /**
  * @file bit_cast_impl.hpp
- * @brief
+ * @brief Provides 'bit_cast' for C++ <= 20
  */
+
+// ReSharper disable CppRedundantInlineSpecifier
 
 #pragma once
 #ifndef CPP_PIPE_OPERATOR_HELPER_BIT_CAST_IMPL_HPP
@@ -21,7 +23,7 @@
 namespace pipe_operator_helper::detail {
 
 template<typename To, typename From>
-PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR To bit_cast_impl(const From& from) noexcept
+inline PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR To bit_cast_impl(const From& from) noexcept
 {
 #if (__cplusplus >= 202002L)  // C++20
     return std::bit_cast<To>(from);

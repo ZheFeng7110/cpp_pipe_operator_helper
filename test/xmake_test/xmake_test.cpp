@@ -21,9 +21,9 @@ static int add(const int a, const int b) noexcept
     return a + b;
 }
 
-static auto add(const int b) noexcept -> pipe_::pipe_tag<int (&)(int, int), const int>
+static auto add(const int b) noexcept
 {
-    return pipe_::pipe_tag<int (&)(int, int), const int>{add, std::forward<const int>(b)};
+    return pipe_::pipe_tag{[=](const int a) noexcept { return add(a, b); }};
 }
 
 #define ASSERT(cond)         \

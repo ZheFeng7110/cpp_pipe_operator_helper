@@ -1,6 +1,6 @@
 /**
  * @file pipe_operator_helper.hpp
- * @brief
+ * @brief Lib pipe_operator_helper main header
  */
 
 #pragma once
@@ -9,7 +9,7 @@
 
 #include "pipe_operator_helper/detail/config.hpp"
 
-#include "pipe_operator_helper/pipe_tag.hpp"
+#include "pipe_operator_helper/pipe_operator.hpp"
 #include "pipe_operator_helper/type_cast.hpp"
 
 #endif // !CPP_PIPE_OPERATOR_HELPER_PIPE_OPERATOR_HELPER_HPP

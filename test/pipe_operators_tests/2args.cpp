@@ -36,19 +36,15 @@ PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR int add(const int a, const int b) noexcept
 }
 
 PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto add(const int b) noexcept
-#ifdef TEST_IS_CPP20_OR_HIGHER
-    -> pipe_::constexpr_pipe_tag<int (&)(int, int) noexcept, const int>
-#else
-    -> pipe_::pipe_tag<int (&)(int, int) noexcept, const int>
-#endif
 {
-    return {add, pipe_::forward_arg<const int>(b)};
+    return pipe_::pipe_tag{[=](const int a) noexcept { return add(a, b); }};
 }
 
 }  // namespace
 
 TEST(Pipe2ArgsTest, Add)
 {
+    using namespace pipe_::operators;
 #if (defined(TEST_IS_CPP20_OR_HIGHER) && !defined(_MSC_VER))
     static_assert(2 == add(1, 1));
     static_assert(2 == (1 | add(1)));
@@ -79,13 +75,8 @@ PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR int divide(const int a, const int b)
 }
 
 PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto divide(const int b)
-#ifdef TEST_IS_CPP20_OR_HIGHER
-    -> pipe_::constexpr_pipe_tag<int (&)(int, int), const int>
-#else
-    -> pipe_::pipe_tag<int (&)(int, int), const int>
-#endif
 {
-    return {divide, pipe_::forward_arg<const int>(b)};
+    return pipe_::pipe_tag{[=](const int a) { return divide(a, b); }};
 }
 
 }  // namespace
@@ -95,14 +86,15 @@ TEST(Pipe2ArgsTest, Divide)
 #if (defined(TEST_IS_CPP20_OR_HIGHER) && !defined(_MSC_VER))
     constexpr std::equal_to<int> eq;
 
+    static_assert(requires { divide(1, 0); });
+    static_assert(requires { 1 | divide(0); });
+
     static_assert(eq(2, divide(4, 2)));
     static_assert(eq(2, 4 | divide(2)));
 
     static_assert(eq(-1, divide(divide(4, 2), -2)));
     static_assert(eq(-1, 4 | divide(2) | divide(-2)));
 
-    static_assert(requires { divide(1, 0); });
-    static_assert(requires { 1 | divide(0); });
 #endif
 
     EXPECT_FALSE(noexcept(divide(1, 1)));
@@ -133,13 +125,8 @@ PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto add(const T a, const U b) noexcept -> 
 
 template<typename T, typename U>
 PIPE_OPERATOR_HELPER_CPP20_CONSTEXPR auto add(const U b) noexcept
-#ifdef TEST_IS_CPP20_OR_HIGHER
-    -> pipe_::constexpr_pipe_tag<decltype(std::declval<T>() + std::declval<U>()) (&)(T, U) noexcept, const U>
-#else
-    -> pipe_::pipe_tag<decltype(std::declval<T>() + std::declval<U>()) (&)(T, U) noexcept, const U>
-#endif
 {
-    return {add<T, U>, pipe_::forward_arg<const U>(b)};
+    return pipe_::pipe_tag{[=](const T a) noexcept { return add<T, U>(a, b); }};
 }
 
 }  // namespace template_test
@@ -186,9 +173,9 @@ consteval int bit_or(const int a, const int b) noexcept
     return a | b;
 }
 
-consteval auto bit_or(const int b) noexcept -> pipe_::consteval_pipe_tag<int (&)(int, int) noexcept, const int>
+consteval auto bit_or(const int b) noexcept
 {
-    return {bit_or, pipe_::forward_arg<const int>(b)};
+    return pipe_::pipe_tag{[=](const int a) noexcept { return bit_or(a, b); }};
 }
 
 namespace test {

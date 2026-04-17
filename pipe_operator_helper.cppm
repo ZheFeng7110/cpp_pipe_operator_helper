@@ -1,6 +1,6 @@
 /**
  * @file pipe_operator_helper.cppm
- * @brief
+ * @brief Lib pipe_operator_helper module interface unit
  */
 
 module;
@@ -12,7 +12,6 @@ module;
 #endif
 
 #include <utility>
-#include <tuple>
 #include <type_traits>
 #include <functional>
 
