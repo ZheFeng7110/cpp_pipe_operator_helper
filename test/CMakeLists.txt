@@ -55,7 +55,7 @@ add_executable(${testProjectName})
 
 file(GLOB_RECURSE pipeTestSources "pipe_operators_tests/*.cpp")
 target_sources(${testProjectName}
-    PRIVATE type_cast_test.cpp ${pipeTestSources}
+    PRIVATE test_main.cpp type_cast_test.cpp ${pipeTestSources}
     PRIVATE FILE_SET headers TYPE HEADERS FILES gtest_pch.hpp
 )
 
@@ -66,8 +66,9 @@ if ((${cppStandard} GREATER_EQUAL 20) AND (CPP_PIPE_OPERATOR_HELPER_USE_MODULES)
     target_compile_definitions(${testProjectName} PRIVATE TEST_USE_MODULE)
 endif ()
 
-target_link_libraries(${testProjectName} PRIVATE cpp_pipe_operator_helper
-    GTest::gtest_main
+target_link_libraries(${testProjectName} PRIVATE
+    cpp_pipe_operator_helper
+    GTest::gtest
 )
 
 if (NOT MSVC AND (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang"))

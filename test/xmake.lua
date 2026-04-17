@@ -1,4 +1,4 @@
-add_requires("gtest v1.17.0", {configs = {main = true, gmock = false}})
+add_requires("gtest v1.17.0", {configs = {gmock = false}})
 
 target("cpp_pipe_operator_helper_test", function ()
     set_kind("binary")
