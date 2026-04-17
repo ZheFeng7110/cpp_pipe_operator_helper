@@ -35,7 +35,7 @@ if (CPP_PIPE_OPERATOR_HELPER_USE_MODULES)
         message(STATUS "Provides module with shared library.")
 
         if (MSVC)
-        target_sources(${PROJECT_NAME} PRIVATE src/dll_dummy_export.cpp)
+            target_sources(${PROJECT_NAME} PRIVATE src/dll_dummy_export.cpp)
         endif ()
     else ()
         add_library(${PROJECT_NAME} STATIC)

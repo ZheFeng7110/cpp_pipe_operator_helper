@@ -81,9 +81,8 @@ jobs:
       - name: XMake Config
         run: >
           xmake f --cxx=g++-14 --ld=g++-14
-          --cpp_pipe_operator_helper-use-modules=y
-          --cpp_pipe_operator_helper-enable-test=y
-          --cpp_pipe_operator_helper-build-shared=n
+          --modules=y
+          --test=y
           --verbose --builddir=build-xmake
 
       - name: XMake build
