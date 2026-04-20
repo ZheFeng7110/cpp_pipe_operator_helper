@@ -28,6 +28,23 @@ jobs:
 
       - run: source ~/.bashrc
 
+      # C++14
+      - name: CMake config C++14
+        run: >
+          cmake -S . -B build-14 -G Ninja -DCMAKE_BUILD_TYPE=Release
+          -DCPP_PIPE_OPERATOR_HELPER_USE_MODULES=OFF
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_SHARED=OFF
+          -DCPP_PIPE_OPERATOR_HELPER_BUILD_TESTS=ON
+          -DCPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD=14
+          -DCPP_PIPE_OPERATOR_HELPER_INSTALL=ON
+          --debug-output
+      - name: CMake build C++14
+        run: cmake --build build-14 --verbose
+      - name: ctest C++14
+        run: cd build-14 && ctest . --verbose && cd ..
+      - name: clean C++14
+        run: rm -r ./build-14
+
       # C++17
       - name: CMake config C++17
         run: >
@@ -36,6 +53,7 @@ jobs:
           -DCPP_PIPE_OPERATOR_HELPER_BUILD_SHARED=OFF
           -DCPP_PIPE_OPERATOR_HELPER_BUILD_TESTS=ON
           -DCPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD=17
+          -DCPP_PIPE_OPERATOR_HELPER_INSTALL=ON
           --debug-output
       - name: CMake build C++17
         run: cmake --build build-17 --verbose
@@ -53,6 +71,7 @@ jobs:
           -DCPP_PIPE_OPERATOR_HELPER_BUILD_SHARED=ON
           -DCPP_PIPE_OPERATOR_HELPER_BUILD_TESTS=ON
           -DCPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD=20
+          -DCPP_PIPE_OPERATOR_HELPER_INSTALL=ON
           --debug-output
       - name: CMake build C++20
         run: cmake --build build-20 --verbose
@@ -70,6 +89,7 @@ jobs:
           -DCPP_PIPE_OPERATOR_HELPER_BUILD_SHARED=OFF
           -DCPP_PIPE_OPERATOR_HELPER_BUILD_TESTS=ON
           -DCPP_PIPE_OPERATOR_HELPER_TEST_CPP_STANDARD=23
+          -DCPP_PIPE_OPERATOR_HELPER_INSTALL=ON
           --debug-output
       - name: CMake build C++23
         run: cmake --build build-23 --verbose
