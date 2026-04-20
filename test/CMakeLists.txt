@@ -40,7 +40,6 @@ block (SCOPE_FOR POLICIES)
         message(FATAL_ERROR "Failed to add googletest")
     endif ()
 endblock ()
-include(GoogleTest)
 
 if (MSVC)
     add_compile_options(/W4 /Zc:__cplusplus)
@@ -78,4 +77,7 @@ endif ()
 
 target_precompile_headers(${testProjectName} PRIVATE gtest_pch.hpp)
 
-gtest_discover_tests(${testProjectName})
+add_test(
+    NAME ${testProjectName}
+    COMMAND ${testProjectName}
+)
