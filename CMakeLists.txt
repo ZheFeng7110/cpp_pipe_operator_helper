@@ -37,6 +37,8 @@ if (CPP_PIPE_OPERATOR_HELPER_BUILD_TESTS)
 endif ()
 
 if (CPP_PIPE_OPERATOR_HELPER_USE_MODULES)
+    set(CMAKE_CXX_SCAN_FOR_MODULES ON)
+
     if (CPP_PIPE_OPERATOR_HELPER_BUILD_SHARED)
         add_library(${PROJECT_NAME} SHARED)
         message(STATUS "Provides module with shared library.")
