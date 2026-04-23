@@ -19,7 +19,7 @@ target(project_name, function ()
         if get_config("modules") then
             print("[%s]: provide modules.", project_name)
             target:set("kind", "moduleonly")
-            target:add("files", "pipe_operator_helper.cppm", {public = true})
+            target:add("files", "modules/pipe_operator_helper.cppm", {public = true})
         else
             print("[%s]: provide headers.", project_name)
             target:set("kind", "headeronly")
