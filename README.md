@@ -1,3 +1,12 @@
+Archive Notice
+
+This repository is no longer actively maintained. Active development continues
+at [ccc](https://github.com/ZheFeng7110/ccc),
+and `cpp_pipe_operator_helper` will be a component of the `ccc` library. If you are interested in the latest features
+and improvements, please check out the `ccc` repository.
+
+---
+
 # cpp_pipe_operator_helper
 
 `cpp_pipe_operator_helper` is a small C++ utility library that enables a pipe-style invocation syntax and pipe-style
@@ -84,13 +93,14 @@ ctest --test-dir build
   is configured to build the module(`-DCPP_PIPE_OPERATOR_HELPER_USE_MODULES=ON`), you can import `pipe_operator_helper`
   instead of including the header.
 - For up-to-date usage patterns, check:
-  - `test/pipe_operators_tests/1arg.cpp`
-  - `test/pipe_operators_tests/2args.cpp`
-  - `test/type_cast_test.cpp`
+    - `test/pipe_operators_tests/1arg.cpp`
+    - `test/pipe_operators_tests/2args.cpp`
+    - `test/type_cast_test.cpp`
 
 ## Special Thanks
 
-* The implementation of v1.x.x was inspired by [wzxzhuxi/cpp-functional-programming](https://github.com/wzxzhuxi/cpp-functional-programming/tree/main/06-composition).
+* The implementation of v1.x.x was inspired
+  by [wzxzhuxi/cpp-functional-programming](https://github.com/wzxzhuxi/cpp-functional-programming/tree/main/06-composition).
 
 ## Contributing
 
